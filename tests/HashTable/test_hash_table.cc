@@ -38,6 +38,8 @@ TEST(HashTableTest, InsertTableCapacityKeys_FullLoadFactor) {
         table.Insert(key, "val");
     }
 
+    std::cout << "HERE " << std::flush;
+
     // Check if the table is full using it's load factor.
     EXPECT_EQ(table.GetLoadFactor(), 1.0f);
 

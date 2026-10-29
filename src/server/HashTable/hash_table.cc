@@ -76,10 +76,19 @@ Source: https://en.wikipedia.org/wiki/Triangular_number
 */
 
 void HashTable::Insert(std::string key, std::string value) {
+    size_t growth_left_before_insert = growth_left;
+
+
     uint64_t hashValue = absl::Hash<std::string>{}(key);
     size_t slot = H1(hashValue); // need to log the table before hand, the intitial slot, then the jumps and see why its not inserting at the correct position.
+    
+    for (auto slot : this->slots) {
+        // std::cout << "[" << slot.first  << "]-" << "[" << slot.second << "] ";
+    }
+    std::cout << std::endl;
+
     size_t initial_slot = slot;
-    //std::cout << "Initial slot: " << initial_slot << std::endl;
+    // std::cout << "Initial slot: " << initial_slot << std::endl;
     // LogSlots();
     int8_t ctrl_byte = H2(hashValue);
 
@@ -129,6 +138,12 @@ void HashTable::Insert(std::string key, std::string value) {
         }
     }
 
+    if (growth_left_before_insert - 1 != growth_left) {
+        // log it
+    }
+    std::cout << ": " << growth_left << std::endl;
+
+    /*
     if (!inserted && GetLoadFactor() == 1.0f) {
         std::cout << "growth_left: " << growth_left << std::endl;
         throw std::runtime_error("Failed to insert. Table full.");
@@ -139,6 +154,7 @@ void HashTable::Insert(std::string key, std::string value) {
         std::cout << "growth_left: " << growth_left << std::endl;
         throw std::runtime_error("Failed to insert. Table more than full.");
     }
+    */
 }
 
 // Finds the key in the table.
