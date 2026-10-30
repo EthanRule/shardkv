@@ -82,14 +82,11 @@ void HashTable::Insert(std::string key, std::string value) {
     uint64_t hashValue = absl::Hash<std::string>{}(key);
     size_t slot = H1(hashValue); // need to log the table before hand, the intitial slot, then the jumps and see why its not inserting at the correct position.
     
-    for (auto slot : this->slots) {
-        // std::cout << "[" << slot.first  << "]-" << "[" << slot.second << "] ";
-    }
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
     size_t initial_slot = slot;
-    // std::cout << "Initial slot: " << initial_slot << std::endl;
-    // LogSlots();
+    std::cout << "Initial slot: " << initial_slot << std::endl;
+    LogSlots();
     int8_t ctrl_byte = H2(hashValue);
 
     bool inserted = false;
@@ -98,32 +95,37 @@ void HashTable::Insert(std::string key, std::string value) {
     assert((double)capacity / (double)kWidth == 8.0f); // TODO: Move this into a unit test that is more generic than 8.0f.
     size_t jumps = 0;
 
+    bool inserted_val = false;
+
     while(jumps < max_jumps) {
-        //std::cout << "jumping: " << jumps << " times, and checking 16 slots from: " << slot << std::endl;
-        //std::cout << "Group range: " << slot << " - " << slot + 15 << std::endl;
-        for (size_t i = slot; i < slot + 16; ++i) {
+        std::cout << "jumping: " << jumps << " times, and checking 16 slots from: " << slot << std::endl;
+        std::cout << "Group range: " << slot << " - " << slot + 15 << std::endl;
+        for (size_t i = slot; i < slot + kWidth; ++i) {
             if (ctrl[i] == kEmpty) {
 
                 // Check if its a clone.
-                if (i > capacity) {
+                if (i > capacity - 1) { // -1?
+                    std::cout << "Set clone" << std::endl;
                     ctrl[i - capacity - 1] = ctrl_byte;
-                    ctrl[i] = ctrl_byte;
                     slots[i - capacity - 1] = {key, value};
+
                 } else {
+                    std::cout << "Set normal" << std::endl;
                     ctrl[i] = ctrl_byte;
                     slots[i] = {key, value};
                 }
 
                 inserted = true;
                 growth_left--;
+                inserted_val = true;
                 break;
             } else {
-                //std::cout << "slot: " << i << " is not kEmpty: " << ctrl[i] << std::endl;
             }
         }
 
-        if (inserted) break;
-
+        if (inserted) {
+            break;
+        }
 
         //TODO: create a unit test that ensures we jump 8 or a generic distinct groups on a full table.
         jumps++;
@@ -138,10 +140,20 @@ void HashTable::Insert(std::string key, std::string value) {
         }
     }
 
+
     if (growth_left_before_insert - 1 != growth_left) {
-        // log it
+
+        if (!inserted_val) {
+
+
+        std::cout << "Failed to insert" << std::endl;
+            std::cout << "NEVER INSERTED, growth_left: " << growth_left << ", table: \n";
+
+            for (auto slot : this->slots) {
+                std::cout << "[" << slot.first  << "]-" << "[" << slot.second << "] ";
+            }
+        }
     }
-    std::cout << ": " << growth_left << std::endl;
 
     /*
     if (!inserted && GetLoadFactor() == 1.0f) {

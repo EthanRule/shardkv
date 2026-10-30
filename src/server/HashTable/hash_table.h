@@ -59,6 +59,7 @@ private:
     size_t growth_left;
     
     // NOTE: Control bytes: 0-127, Sentinel: 128, Clones: kWidth - 1.
+    // TODO: Convert to std::arrays and use C++ pointers instead of raw.
     ctrl_t ctrl[capacity + 1 + kWidth - 1];
 
     slot_type slots[capacity];
@@ -68,11 +69,17 @@ public:
     // Constructor defines default values for HashTable.
     HashTable() {
 
-        // Initialize control byte and slots array to empty values.
+        // Initialize slots array to empty values.
         for (size_t i {}; i < capacity; ++i) {
-            ctrl[i] = kEmpty;
             slots[i] = {"", ""};
         }
+
+        // Initialize ctrl byte array to empty values.
+        for (size_t i {}; i < capacity + kWidth; ++i) {
+            if (i == capacity + 1) continue; // Sentinel
+            ctrl[i] = kEmpty;
+        }
+
 
         ctrl[128] = kSentinel;
         growth_left = capacity - 1;
@@ -95,6 +102,12 @@ public:
     
     // Returns a pointer to the start of the table.
     const slot_type* GetHashTablePairs() const {
+        std::cout << "START" << std::endl;
+        const slot_type* start = this->slots;
+        for (size_t i {}; i < capacity; ++i) {
+            std::cout << start[i].first << " , " << start[i].second << std::endl;
+        }
+        std::cout << "END" << std::endl;
         return this->slots;
     }
 
